@@ -1,0 +1,172 @@
+openapi: 3.0.1
+info:
+  title: core
+  description: api for md4u.io
+  version: 1.0.0
+servers:
+  - url: /api/v1
+tags:
+  - name: Examples
+    description: Simple example endpoints
+  - name: Specification
+    description: The swagger API specification
+  - name: AWS
+    description: Services that utilize Amazon Web Services (AWS)
+  - name: ToDo
+    description: Incomplete or non functioning
+paths:
+  /files/{bucket}:
+    get:
+      tags:
+        - AWS
+      description: Fetch a list of files from bucket
+      parameters:
+        - name: bucket
+          in: path
+          description: Name of bucket to list files
+          required: true
+          example: 'app.md4u.io'
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns all files
+          content: {} # TODO - Make Schema
+        400:
+          description: Bad Request
+        403:
+          description: Forbidden - IAM may not set to view requested bucket
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - AWS
+      description: Upload a file to S3
+      parameters:
+        - name: bucket
+          in: path
+          description: S3 Bucket's name
+          required: true
+          example: 'app.md4u.io'
+          schema:
+            type: string
+      requestBody:
+        description: File(s) to upload into bucket
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        201:
+          description: Successfully uploaded resource
+        500:
+          description: Server Error
+    delete:
+      tags:
+        - AWS
+        - ToDo
+      description: Delete a file in S3
+      responses:
+        200:
+          description: Server has successfully processed request
+  /logs/{group}/{stream}:
+    get:
+      tags:
+        - AWS
+      description: Fetch Cloudwatch Logs
+      parameters:
+        - name: group
+          in: path
+          description: Log Group Name field in AWS
+          required: true
+          example: '/aws/codebuild/md4u'
+          schema:
+            type: string
+        - name: stream
+          in: path
+          description: Log Stream Name field in AWS
+          required: true
+          example: '2421437b-debb-4303-927a-b93cf895bccd'
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns all examples
+          content: {} # ToDo Schema
+        400:
+          description: Bad Request
+        403:
+          description: Forbidden - You may need to adjust IAM to view this particular resource
+        404:
+          description: Logs were not found for given resources (ToDo)
+        500:
+          description: Internal Server error
+
+  /examples:
+    get:
+      tags:
+        - Examples
+      description: Fetch all examples
+      responses:
+        200:
+          description: Returns all examples
+          content: {}
+    post:
+      tags:
+        - Examples
+      description: Create a new example
+      requestBody:
+        description: an example
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExampleBody'
+        required: true
+      responses:
+        200:
+          description: Returns all examples
+          content: {}
+  /examples/{id}:
+    get:
+      tags:
+        - Examples
+      parameters:
+        - name: id
+          in: path
+          description: The id of the example to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Return the example with the specified id
+          content: {}
+        404:
+          description: Example not found
+          content: {}
+  /spec:
+    get:
+      tags:
+        - Specification
+      responses:
+        200:
+          description: Return the API specification
+          content: {}
+components:
+  schemas:
+    ExampleBody:
+      title: example
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: no_stress
